@@ -3,7 +3,7 @@ import L from 'leaflet';
 // postCSS import of Leaflet's CSS
 import 'leaflet/dist/leaflet.css';
 // using webpack json loader we can import our geojson file like this
-import geojson from 'json!./bk_subway_entrances.geojson';
+import geojson from 'json!./custom.geojson';
 // import local components Filter and ForkMe
 import Filter from './Filter';
 import ForkMe from './ForkMe';
@@ -12,20 +12,13 @@ import ForkMe from './ForkMe';
 // we could also move this to a separate file & import it if desired.
 let config = {};
 config.params = {
-  center: [40.655769,-73.938503],
-  zoomControl: false,
-  zoom: 13,
-  maxZoom: 19,
-  minZoom: 11,
-  scrollwheel: false,
-  legends: true,
-  infoControl: false,
-  attributionControl: true
+  center: [20.0,5.0],
+
 };
 config.tileLayer = {
-  uri: 'http://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
+  uri: 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
   params: {
-    minZoom: 11,
+    minZoom: 2,
     attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="http://cartodb.com/attributions">CartoDB</a>',
     id: '',
     accessToken: ''
@@ -48,16 +41,12 @@ class Map extends Component {
       numEntrances: null
     };
     this._mapNode = null;
-    this.updateMap = this.updateMap.bind(this);
-    this.onEachFeature = this.onEachFeature.bind(this);
-    this.pointToLayer = this.pointToLayer.bind(this);
-    this.filterFeatures = this.filterFeatures.bind(this);
-    this.filterGeoJSONLayer = this.filterGeoJSONLayer.bind(this);
   }
 
   componentDidMount() {
     // code to run just after the component "mounts" / DOM elements are created
     // we could make an AJAX request for the GeoJSON data here if it wasn't stored locally
+    debugger;
     this.getData();
     // create the Leaflet map object
     if (!this.state.map) this.init(this._mapNode);
@@ -72,10 +61,10 @@ class Map extends Component {
     }
 
     // check to see if the subway lines filter has changed
-    if (this.state.subwayLinesFilter !== prevState.subwayLinesFilter) {
-      // filter / re-render the geojson overlay
-      this.filterGeoJSONLayer();
-    }
+    // if (this.state.subwayLinesFilter !== prevState.subwayLinesFilter) {
+    //   // filter / re-render the geojson overlay
+    //   this.filterGeoJSONLayer();
+    // }
   }
 
   componentWillUnmount() {
@@ -110,8 +99,7 @@ class Map extends Component {
     // an options object is passed to define functions for customizing the layer
     const geojsonLayer = L.geoJson(geojson, {
       onEachFeature: this.onEachFeature,
-      pointToLayer: this.pointToLayer,
-      filter: this.filterFeatures
+      pointToLayer: this.pointToLayer
     });
     // add our GeoJSON layer to the Leaflet map object
     geojsonLayer.addTo(this.state.map);
@@ -197,9 +185,13 @@ class Map extends Component {
   init(id) {
     if (this.state.map) return;
     // this function creates the Leaflet map object and is called after the Map component mounts
-    let map = L.map(id, config.params);
-    L.control.zoom({ position: "bottomleft"}).addTo(map);
-    L.control.scale({ position: "bottomleft"}).addTo(map);
+    let map = L.map(id, {
+    center: [20.0, 5.0],
+    minZoom: 2,
+    zoom: 2
+});
+    //L.control.zoom({ position: "bottomleft"}).addTo(map);
+    //L.control.scale({ position: "bottomleft"}).addTo(map);
 
     // a TileLayer is used as the "basemap"
     const tileLayer = L.tileLayer(config.tileLayer.uri, config.tileLayer.params).addTo(map);
@@ -209,18 +201,9 @@ class Map extends Component {
   }
 
   render() {
-    const { subwayLinesFilter } = this.state;
     return (
       <div id="mapUI">
-        {
-          /* render the Filter component only after the subwayLines array has been created */
-          subwayLineNames.length &&
-            <Filter lines={subwayLineNames}
-              curFilter={subwayLinesFilter}
-              filterLines={this.updateMap} />
-        }
         <div ref={(node) => this._mapNode = node} id="map" />
-        <ForkMe />
       </div>
     );
   }
