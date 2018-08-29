@@ -12,14 +12,14 @@ import ForkMe from './ForkMe';
 // we could also move this to a separate file & import it if desired.
 let config = {};
 config.params = {
-  center: [20.0,5.0],
-
+  center: [20.0, 5.0]
 };
 config.tileLayer = {
   uri: 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
   params: {
     minZoom: 2,
-    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="http://cartodb.com/attributions">CartoDB</a>',
+    attribution:
+      '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="http://cartodb.com/attributions">CartoDB</a>',
     id: '',
     accessToken: ''
   }
@@ -46,7 +46,6 @@ class Map extends Component {
   componentDidMount() {
     // code to run just after the component "mounts" / DOM elements are created
     // we could make an AJAX request for the GeoJSON data here if it wasn't stored locally
-    debugger;
     this.getData();
     // create the Leaflet map object
     if (!this.state.map) this.init(this._mapNode);
@@ -85,8 +84,8 @@ class Map extends Component {
   updateMap(e) {
     let subwayLine = e.target.value;
     // change the subway line filter
-    if (subwayLine === "All lines") {
-      subwayLine = "*";
+    if (subwayLine === 'All lines') {
+      subwayLine = '*';
     }
     // update our state with the new filter value
     this.setState({
@@ -121,17 +120,19 @@ class Map extends Component {
   zoomToFeature(target) {
     // pad fitBounds() so features aren't hidden under the Filter UI element
     var fitBoundsParams = {
-      paddingTopLeft: [200,10],
-      paddingBottomRight: [10,10]
+      paddingTopLeft: [200, 10],
+      paddingBottomRight: [10, 10]
     };
     // set the map's center & zoom so that it fits the geographic extent of the layer
-    this.state.map.fitBounds(target.getBounds(), fitBoundsParams);
+    //this.state.map.fitBounds(target.getBounds(), fitBoundsParams);
   }
 
   filterFeatures(feature, layer) {
     // filter the subway entrances based on the map's current search filter
     // returns true only if the filter value matches the value of feature.properties.LINE
-    const test = feature.properties.LINE.split('-').indexOf(this.state.subwayLinesFilter);
+    const test = feature.properties.LINE.split('-').indexOf(
+      this.state.subwayLinesFilter
+    );
     if (this.state.subwayLinesFilter === '*' || test !== -1) {
       return true;
     }
@@ -153,19 +154,24 @@ class Map extends Component {
   }
 
   onEachFeature(feature, layer) {
-    if (feature.properties && feature.properties.NAME && feature.properties.LINE) {
-
+    if (
+      feature.properties &&
+      feature.properties.NAME &&
+      feature.properties.LINE
+    ) {
       // if the array for unique subway line names has not been made, create it
       // there are 19 unique names total
       if (subwayLineNames.length < 19) {
-
         // add subway line name if it doesn't yet exist in the array
-        feature.properties.LINE.split('-').forEach(function(line, index){
+        feature.properties.LINE.split('-').forEach(function(line, index) {
           if (subwayLineNames.indexOf(line) === -1) subwayLineNames.push(line);
         });
 
         // on the last GeoJSON feature
-        if (this.state.geojson.features.indexOf(feature) === this.state.numEntrances - 1) {
+        if (
+          this.state.geojson.features.indexOf(feature) ===
+          this.state.numEntrances - 1
+        ) {
           // use sort() to put our values in alphanumeric order
           subwayLineNames.sort();
           // finally add a value to represent all of the subway lines
@@ -186,16 +192,19 @@ class Map extends Component {
     if (this.state.map) return;
     // this function creates the Leaflet map object and is called after the Map component mounts
     let map = L.map(id, {
-    center: [20.0, 5.0],
-    minZoom: 2,
-    zoom: 2
-});
+      center: [20.0, 5.0],
+      minZoom: 3,
+      zoom: 2
+    });
     //L.control.zoom({ position: "bottomleft"}).addTo(map);
     //L.control.scale({ position: "bottomleft"}).addTo(map);
 
     // a TileLayer is used as the "basemap"
-    const tileLayer = L.tileLayer(config.tileLayer.uri, config.tileLayer.params).addTo(map);
-
+    const tileLayer = L.tileLayer(
+      config.tileLayer.uri,
+      config.tileLayer.params
+    ).addTo(map);
+    map.fitWorld({ animate: false });
     // set our state to include the tile layer
     this.setState({ map, tileLayer });
   }
@@ -203,7 +212,7 @@ class Map extends Component {
   render() {
     return (
       <div id="mapUI">
-        <div ref={(node) => this._mapNode = node} id="map" />
+        <div ref={node => (this._mapNode = node)} id="map" />
       </div>
     );
   }
