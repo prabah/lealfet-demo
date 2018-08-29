@@ -204,6 +204,21 @@ class Map extends Component {
       config.tileLayer.uri,
       config.tileLayer.params
     ).addTo(map);
+
+    // let latlang = [
+    //   [[17.385044, -75.486671], [16.506174, 80.648015], [17.686816, 83.218482]],
+    //   [[13.08268, 80.270718], [12.971599, 77.594563], [15.828126, 78.037279]]
+    // ];
+    // let multiPolyLineOptions = { color: 'red' };
+    // let multipolyline = L.multiPolyline(latlang, multiPolyLineOptions);
+
+    let arcedPolyline = new L.ArcedPolyline([
+      [[17.385044, -75.486671], [16.506174, 80.648015]],
+      [[13.08268, 80.270718], [12.971599, 77.594563]]
+    ]);
+
+    map.addLayer(arcedPolyline);
+
     map.fitWorld({ animate: false });
     // set our state to include the tile layer
     this.setState({ map, tileLayer });
