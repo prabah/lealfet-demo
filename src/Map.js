@@ -1,12 +1,13 @@
 import React, { Component } from 'react';
 import L from 'leaflet';
-// postCSS import of Leaflet's CSS
+import '../node_modules/leaflet-dvf/examples/data/usAirports.js';
+import '../node_modules/leaflet-dvf/examples/data/flightData.js';
+//import '../node_modules/leaflet-dvf/dist/leaflet-dvf.js';
+//import 'leaflet-dvf';
 import 'leaflet/dist/leaflet.css';
-// using webpack json loader we can import our geojson file like this
+import 'leaflet-dvf/dist/css/dvf.css';
 import geojson from 'json!./custom.geojson';
-// import local components Filter and ForkMe
-import Filter from './Filter';
-import ForkMe from './ForkMe';
+import arc from 'arc';
 
 // store the map configuration properties in an object,
 // we could also move this to a separate file & import it if desired.
@@ -25,9 +26,22 @@ config.tileLayer = {
   }
 };
 
+// config.tileLayer = L.tileLayer.provider('Stamen.TonerLite', {
+//   minZoom: 2,
+//   zIndex: 1
+// });
+
 // array to store unique names of Brooklyn subway lines,
 // this eventually gets passed down to the Filter component
-let subwayLineNames = [];
+
+let flights = [
+  {
+    airline: 'AA',
+    airport1: 'DFW',
+    airport2: 'SJU',
+    cnt: '120'
+  }
+];
 
 class Map extends Component {
   constructor(props) {
@@ -127,17 +141,6 @@ class Map extends Component {
     //this.state.map.fitBounds(target.getBounds(), fitBoundsParams);
   }
 
-  filterFeatures(feature, layer) {
-    // filter the subway entrances based on the map's current search filter
-    // returns true only if the filter value matches the value of feature.properties.LINE
-    const test = feature.properties.LINE.split('-').indexOf(
-      this.state.subwayLinesFilter
-    );
-    if (this.state.subwayLinesFilter === '*' || test !== -1) {
-      return true;
-    }
-  }
-
   pointToLayer(feature, latlng) {
     // renders our GeoJSON points as circle markers, rather than Leaflet's default image markers
     // parameters to style the GeoJSON markers
@@ -153,41 +156,6 @@ class Map extends Component {
     return L.circleMarker(latlng, markerParams);
   }
 
-  onEachFeature(feature, layer) {
-    if (
-      feature.properties &&
-      feature.properties.NAME &&
-      feature.properties.LINE
-    ) {
-      // if the array for unique subway line names has not been made, create it
-      // there are 19 unique names total
-      if (subwayLineNames.length < 19) {
-        // add subway line name if it doesn't yet exist in the array
-        feature.properties.LINE.split('-').forEach(function(line, index) {
-          if (subwayLineNames.indexOf(line) === -1) subwayLineNames.push(line);
-        });
-
-        // on the last GeoJSON feature
-        if (
-          this.state.geojson.features.indexOf(feature) ===
-          this.state.numEntrances - 1
-        ) {
-          // use sort() to put our values in alphanumeric order
-          subwayLineNames.sort();
-          // finally add a value to represent all of the subway lines
-          subwayLineNames.unshift('All lines');
-        }
-      }
-
-      // assemble the HTML for the markers' popups (Leaflet's bindPopup method doesn't accept React JSX)
-      const popupContent = `<h3>${feature.properties.NAME}</h3>
-        <strong>Access to MTA lines: </strong>${feature.properties.LINE}`;
-
-      // add our popups
-      layer.bindPopup(popupContent);
-    }
-  }
-
   init(id) {
     if (this.state.map) return;
     // this function creates the Leaflet map object and is called after the Map component mounts
@@ -196,6 +164,7 @@ class Map extends Component {
       minZoom: 3,
       zoom: 2
     });
+
     //L.control.zoom({ position: "bottomleft"}).addTo(map);
     //L.control.scale({ position: "bottomleft"}).addTo(map);
 
@@ -205,19 +174,24 @@ class Map extends Component {
       config.tileLayer.params
     ).addTo(map);
 
+    let start = { x: -0.46, y: 52 };
+    let end = { x: -92.57, y: 37 };
+    let generator = new arc.GreatCircle(start, end, { name: 'Seattle to DC' });
+    let line = generator.Arc(100, { offset: 10 });
+
+    L.geoJson(line.json(), {
+      color: '#ff0000'
+    }).addTo(map);
+
+    // var graphDataLayer = new L.Graph(flights, options);
+    // map.addLayer(graphDataLayer, options);
+
     // let latlang = [
     //   [[17.385044, -75.486671], [16.506174, 80.648015], [17.686816, 83.218482]],
     //   [[13.08268, 80.270718], [12.971599, 77.594563], [15.828126, 78.037279]]
     // ];
     // let multiPolyLineOptions = { color: 'red' };
     // let multipolyline = L.multiPolyline(latlang, multiPolyLineOptions);
-
-    let arcedPolyline = new L.ArcedPolyline([
-      [[17.385044, -75.486671], [16.506174, 80.648015]],
-      [[13.08268, 80.270718], [12.971599, 77.594563]]
-    ]);
-
-    map.addLayer(arcedPolyline);
 
     map.fitWorld({ animate: false });
     // set our state to include the tile layer
