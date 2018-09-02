@@ -30204,7 +30204,10 @@ class Map extends Component {
     return L.circleMarker(latlng, markerParams);
   }
 
+  
   getLocation(context, locationField, fieldValues, callback) {
+	  debugger;
+	let airportsLookup = L.GeometryUtils.arrayToMap(airports, 'code');
     let key = fieldValues[0];
     let airport = airportsLookup[key];
     let location;
@@ -30246,7 +30249,18 @@ class Map extends Component {
     // let multiPolyLineOptions = { color: 'red' };
     // let multipolyline = L.multiPolyline(latlang, multiPolyLineOptions);
 
-    var sizeFunction = new L.LinearFunction([1, 16], [253, 48]);
+	var sizeFunction = new L.LinearFunction([1, 16], [253, 48]);
+	
+// 	let xyz = { center: {
+// 		lat: 20.8926,
+// 		lng: -156.441
+// 	},
+// 		location: {
+// 	lat: 20.8926,
+// 	lng: -156.441
+// 		},
+// 	text: "OGG"
+// };
 
     var options = {
         recordsField: null,
@@ -30254,7 +30268,7 @@ class Map extends Component {
         fromField: 'airport1',
         toField: 'airport2',
         codeField: null,
-        //getLocation: getLocation,
+        getLocation: this.getLocation,
         getEdge: L.Graph.EDGESTYLE.ARC,
         includeLayer: function (record) {
             return false;
@@ -30307,15 +30321,14 @@ class Map extends Component {
         onEachRecord: function (layer, record) {
             layer.bindPopup($(L.HTMLUtils.buildTable(record)).wrap('<div/>').parent().html());
         }
-    };
+	};
+	
+	map.fitWorld({ animate: false });
+    // set our state to include the tile layer
+    this.setState({ map, tileLayer });
 
     var allLayer = new L.Graph(flights, options);
     map.addLayer(allLayer);
-
-    
-    map.fitWorld({ animate: false });
-    // set our state to include the tile layer
-    this.setState({ map, tileLayer });
   }
 
   render() {
