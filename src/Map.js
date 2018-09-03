@@ -3,7 +3,6 @@ import L from 'leaflet';
 import './leaflet-dvf.js';
 import './flightData.js';
 import './usAirports.js';
-import './jquery.1.9.1.js'
 
 var airports = [
 	{
@@ -44888,9 +44887,11 @@ class Map extends Component {
     return L.circleMarker(latlng, markerParams);
   }
 
+  
   getLocation(context, locationField, fieldValues, callback) {
-		let key = fieldValues[0];
-		var airportsLookup = L.GeometryUtils.arrayToMap(airports, 'code');
+	  debugger;
+	let airportsLookup = L.GeometryUtils.arrayToMap(airports, 'code');
+    let key = fieldValues[0];
     let airport = airportsLookup[key];
     let location;
 
@@ -44905,14 +44906,7 @@ class Map extends Component {
     }
 
     return location;
-};
-
-groupBy(xs, key) {
-  return xs.reduce(function(rv, x) {
-    (rv[x[key]] = rv[x[key]] || []).push(x);
-    return rv;
-  }, {});
-};
+}
 
   init(id) {
     if (this.state.map) return;
@@ -44938,7 +44932,18 @@ groupBy(xs, key) {
     // let multiPolyLineOptions = { color: 'red' };
     // let multipolyline = L.multiPolyline(latlang, multiPolyLineOptions);
 
-    var sizeFunction = new L.LinearFunction([1, 16], [253, 48]);
+	var sizeFunction = new L.LinearFunction([1, 16], [253, 48]);
+	
+// 	let xyz = { center: {
+// 		lat: 20.8926,
+// 		lng: -156.441
+// 	},
+// 		location: {
+// 	lat: 20.8926,
+// 	lng: -156.441
+// 		},
+// 	text: "OGG"
+// };
 
     var options = {
         recordsField: null,
@@ -44999,45 +45004,15 @@ groupBy(xs, key) {
         onEachRecord: function (layer, record) {
             layer.bindPopup($(L.HTMLUtils.buildTable(record)).wrap('<div/>').parent().html());
         }
-    };
-
-		map.fitWorld({ animate: false });
-    // set our state to include the tile layer
-		this.setState({ map, tileLayer });
-		
-    var allLayer = new L.Graph(flights, options);
-		map.addLayer(allLayer);
-		var layerControl = L.control.layers().addTo(map);
-		// Add a legend control
-		var legendControl = L.control.legend({
-			autoAdd: false
-	}).addTo(map);
-
-		var airlineLookup = this.groupBy(flights, "airline")
-		var count = 0;
-		for (var key in airlineLookup) {
-
-			if (key !== 'all') {
-				var airportOptions = L.extend(options, {
-					includeLayer: function (record) {
-						return record.airline === key;
-					}
-			})
-			var flightLayer = new L.Graph(flights, airportOptions);
-							layerControl.addOverlay(flightLayer, key);
-							if (count === 0) {
-								// Add the layers we want to display to the legend
-								// Since all group lines use the same weight and color scales, just add the first layer to the legend
-								legendControl.addLayer(flightLayer);
-
-								// Add each layer to the map
-								//map.addLayer(flightLayer);
-						}
-						count++;
-			}
-		}
-	}
+	};
 	
+	map.fitWorld({ animate: false });
+    // set our state to include the tile layer
+    this.setState({ map, tileLayer });
+
+    var allLayer = new L.Graph(flights, options);
+    map.addLayer(allLayer);
+  }
 
   render() {
     return (
