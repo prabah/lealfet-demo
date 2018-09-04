@@ -2,8 +2,6 @@ import React, { Component } from 'react';
 import L from 'leaflet';
 import '../node_modules/leaflet-dvf/examples/data/usAirports.js';
 import '../node_modules/leaflet-dvf/examples/data/flightData.js';
-//import '../node_modules/leaflet-dvf/dist/leaflet-dvf.js';
-//import 'leaflet-dvf';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-dvf/dist/css/dvf.css';
 import geojson from 'json!./custom.geojson';
@@ -145,7 +143,7 @@ class Map extends Component {
     // renders our GeoJSON points as circle markers, rather than Leaflet's default image markers
     // parameters to style the GeoJSON markers
     var markerParams = {
-      radius: 4,
+      radius: 2,
       fillColor: 'orange',
       color: '#fff',
       weight: 1,
@@ -155,6 +153,8 @@ class Map extends Component {
 
     return L.circleMarker(latlng, markerParams);
   }
+
+  actionLine() {}
 
   init(id) {
     if (this.state.map) return;
@@ -174,13 +174,20 @@ class Map extends Component {
       config.tileLayer.params
     ).addTo(map);
 
-    let start = { x: -0.46, y: 52 };
+    let start = { x: 46, y: 52 };
     let end = { x: -92.57, y: 37 };
     let generator = new arc.GreatCircle(start, end, { name: 'Seattle to DC' });
-    let line = generator.Arc(100, { offset: 10 });
-
+    let line = generator.Arc(20, { offset: 100 });
     L.geoJson(line.json(), {
       color: '#ff0000'
+    }).addTo(map);
+
+    start = { x: 16, y: 32 };
+    end = { x: -92.57, y: 37 };
+    generator = new arc.GreatCircle(start, end, { name: 'Seattle to SS' });
+    line = generator.Arc(20, { offset: 100 });
+    L.geoJson(line.json(), {
+      color: '#fff000'
     }).addTo(map);
 
     // var graphDataLayer = new L.Graph(flights, options);
