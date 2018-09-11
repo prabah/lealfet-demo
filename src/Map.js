@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
-import L from 'leaflet';
-import './leaflet-dvf.js';
+import 'leaflet';
+import {LinearFunction, Graph} from 'leaflet-dvf';
 import './flightData.js';
 import './usAirports.js';
+import _ from 'underscore';
 
 var airports = [
 	{
@@ -44811,8 +44812,8 @@ class Map extends Component {
       numEntrances: geojson.features.length,
       geojson
     });
-  }
-
+	}
+	
   updateMap(e) {
     let subwayLine = e.target.value;
     // change the subway line filter
@@ -44889,9 +44890,8 @@ class Map extends Component {
 
   
   getLocation(context, locationField, fieldValues, callback) {
-	  debugger;
-	let airportsLookup = L.GeometryUtils.arrayToMap(airports, 'code');
-    let key = fieldValues[0];
+		let key = fieldValues[0];
+		var airportsLookup = L.GeometryUtils.arrayToMap(airports, 'code');
     let airport = airportsLookup[key];
     let location;
 
@@ -44925,93 +44925,124 @@ class Map extends Component {
       config.tileLayer.params
     ).addTo(map);
 
-    // let latlang = [
-    //   [[17.385044, -75.486671], [16.506174, 80.648015], [17.686816, 83.218482]],
-    //   [[13.08268, 80.270718], [12.971599, 77.594563], [15.828126, 78.037279]]
-    // ];
-    // let multiPolyLineOptions = { color: 'red' };
-    // let multipolyline = L.multiPolyline(latlang, multiPolyLineOptions);
 
-	var sizeFunction = new L.LinearFunction([1, 16], [253, 48]);
-	
-// 	let xyz = { center: {
-// 		lat: 20.8926,
-// 		lng: -156.441
-// 	},
-// 		location: {
-// 	lat: 20.8926,
-// 	lng: -156.441
-// 		},
-// 	text: "OGG"
-// };
+		var options = {
+			recordsField: null,
+			locationMode: L.LocationModes.CUSTOM,
+			fromField: 'airport1',
+			toField: 'airport2',
+			codeField: null,
+			getLocation: this.getLocation,
+			getEdge: L.Graph.EDGESTYLE.ARC,
+			includeLayer: function (record) {
+					return false;
+			},
+			getIndexKey: function (location, record) {
+					return record.airport1 + '_' + record.airport2;
+			},
+			setHighlight: function (style) {
+					style.opacity = 1.0;
 
-    var options = {
-        recordsField: null,
-        locationMode: L.LocationModes.CUSTOM,
-        fromField: 'airport1',
-        toField: 'airport2',
-        codeField: null,
-        getLocation: this.getLocation,
-        getEdge: L.Graph.EDGESTYLE.ARC,
-        includeLayer: function (record) {
-            return false;
-        },
-        getIndexKey: function (location, record) {
-            return record.airport1 + '_' + record.airport2;
-        },
-        setHighlight: function (style) {
-            style.opacity = 1.0;
+					return style;
+			},
+			unsetHighlight: function (style) {
+					style.opacity = 0.5;
 
-            return style;
-        },
-        unsetHighlight: function (style) {
-            style.opacity = 0.5;
+					return style;
+			},
+			layerOptions: {
+//					dashArray: "15, 15",
+					fill: false,
+					opacity: 1.0,
+					weight: 1.5,
+					fillOpacity: 1.0,
+					distanceToHeight: new L.LinearFunction([0, 20], [1000, 300]),
 
-            return style;
-        },
-        layerOptions: {
-            fill: false,
-            opacity: 0.5,
-            weight: 0.5,
-            fillOpacity: 1.0,
-            distanceToHeight: new L.LinearFunction([0, 20], [1000, 300]),
-            markers: {
-                end: true
-            },
+					//The starting and ending percentages (0 - 1) along the line at which to position control points
+					//controlPointOffsets: new L.Point(0.2, 0.2),
 
-            // Use Q for quadratic and C for cubic
-            mode: 'Q'
-        },
-        legendOptions: {
-            width: 200,
-            numSegments: 5,
-            className: 'legend-line'
-        },
-        tooltipOptions: {
-            iconSize: new L.Point(80, 64),
-            iconAnchor: new L.Point(-5, 64),
-            className: 'leaflet-div-icon line-legend'
-        },
-        displayOptions: {
-            cnt: {
-                weight: new L.LinearFunction([0, 1], [150, 14]),
-                color: new L.HSLHueFunction([0, 200], [150, 330], {
-                    outputLuminosity: '60%'
-                }),
-                displayName: 'Flights'
-            }
-        },
-        onEachRecord: function (layer, record) {
-            layer.bindPopup($(L.HTMLUtils.buildTable(record)).wrap('<div/>').parent().html());
-        }
+					// Q or C for quadratic or cubic bezier
+					mode: 'C',
+					markers: {
+							end: false
+					},
+					
+					animatePath: {
+							property: 'stroke-dashoffset',
+							duration: '1.5s',
+							timingFunction: 'ease-in-out'
+					}
+					
+			},
+			legendOptions: {
+					width: 200,
+					numSegments: 5,
+					className: 'legend-line'
+			},
+			tooltipOptions: {
+					iconSize: new L.Point(80, 64),
+					iconAnchor: new L.Point(-5, 64),
+					className: 'leaflet-div-icon line-legend'
+			},
+			displayOptions: {
+					cnt: {
+							// weight: new L.LinearFunction([0, 1], [100, 14]),
+							color: new L.HSLHueFunction([0, 200], [200, 230], {
+									outputLuminosity: '60%'
+							}),
+							displayName: 'Flights'
+					}
+			},
+			onEachRecord: function (layer, record, location) {
+					//layer.bindPopup($(L.HTMLUtils.buildTable(record)).wrap('<div/>').parent().html());
+
+					location.location.animateLine({
+							duration: Math.random() * 5000 + 500,
+							easing: L.AnimationUtils.easingFunctions.easeOut
+					});
+			}
 	};
-	
-	map.fitWorld({ animate: false });
+
+	var allLayer = new L.Graph(flights, options);
+	map.addLayer(allLayer);
+
+	var layerControl = L.control.layers().addTo(map);
+	var airlineLookup = _.groupBy(flights, function (value) {
+		return value.airline;
+	})
+
+	let count = 0;
+	for (var key in airlineLookup) {
+
+			if (key !== 'all') {
+					// Create a graph layer that draws lines from the location in the fromField to the location in the toField.
+					// In this case, we'll use a custom locationMode and implement the getLocation function to lookup the airport
+					// location from the airport data we have available.
+					var airportOptions = L.extend(options, {
+							includeLayer: function (record) {
+									return record.airline === key;
+							}
+					})
+
+					var flightLayer = new L.Graph(flights, airportOptions);
+
+					layerControl.addOverlay(flightLayer, key);
+
+					if (count === 0) {
+							// Add the layers we want to display to the legend
+							// Since all group lines use the same weight and color scales, just add the first layer to the legend
+							//legendControl.addLayer(flightLayer);
+
+							// Add each layer to the map
+							//map.addLayer(flightLayer);
+					}
+					count++;
+			}
+	}
+
+		map.fitWorld({ animate: false });
     // set our state to include the tile layer
     this.setState({ map, tileLayer });
-
-    var allLayer = new L.Graph(flights, options);
-    map.addLayer(allLayer);
   }
 
   render() {
