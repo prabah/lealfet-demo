@@ -7,15 +7,18 @@ const airports = require('./usAirports.json');
 import 'leaflet/dist/leaflet.css';
 // using webpack json loader we can import our geojson file like this
 import geojson from 'json!./custom.geojson';
+var Filter = require('./Filter');
 
 // store the map configuration properties in an object,
 // we could also move this to a separate file & import it if desired.
 let config = {};
+let subwayLines = [];
+
 config.params = {
   center: [20.0, 5.0]
 };
 config.tileLayer = {
-  uri: 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+  uri: '',
   params: {
     minZoom: 2,
     attribution:
@@ -29,6 +32,10 @@ config.tileLayer = {
 // this eventually gets passed down to the Filter component
 
 class MapsSelection extends Component {
+  constructor(props) {
+    super(props);
+   
+  }
 	state = {
     options: [
       {
@@ -49,18 +56,20 @@ class MapsSelection extends Component {
       },
     ],
     value: '?',
+    tileUri: ''
   };
 
-  handleChange = (event) => {
-		console.log(event.target.value);
-    this.setState({ value: event.target.value });
-  };
+  onFieldChange(event) {
+    // for a regular input field, read field name and value from the event
+    const fieldValue = event.target.value;
+    this.props.onChange(this.state.tileUri, fieldValue);
+}
 
   render() {
     const { options, value } = this.state;
 
     return (
-        <select onChange={this.handleChange} value={value}>
+        <select onChange={this.onFieldChange.bind(this)}>
           {options.map(item => (
             <option key={item.value} value={item.value}>
               {item.name}
@@ -80,6 +89,7 @@ class Map extends Component {
       tileLayer: null,
       geojsonLayer: null,
       geojson: null,
+      tileUri: 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
     };
     this._mapNode = null;
   }
@@ -88,6 +98,7 @@ class Map extends Component {
     // code to run just after the component "mounts" / DOM elements are created
     // we could make an AJAX request for the GeoJSON data here if it wasn't stored locally
     this.getData();
+    debugger;
     // create the Leaflet map object
     if (!this.state.map) this.init(this._mapNode);
   }
@@ -101,16 +112,43 @@ class Map extends Component {
     }
   }
 
+  onChange(value) {
+    debugger;
+    // parent class change handler is always called with field name and value
+    this.state = {
+      map: null,
+      tileLayer: null,
+      geojsonLayer: null,
+      geojson: null,
+      tileUri: value,
+    };
+    let map = L.map("XX", {
+      center: [20.0, 5.0],
+      minZoom: 3,
+      zoom: 2
+    });
+    const tileLayer = L.tileLayer(
+      this.state.tileUri,
+      config.tileLayer.params
+    ).addTo(map);
+}
+
   componentWillUnmount() {
     // code to run just before unmounting the component
     // this destroys the Leaflet map object & related event listeners
     this.state.map.remove();
   }
 
+  getInitialState() {
+    return {
+      tileUri: "http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+    };
+  }
+
   getData() {
     this.setState({
-      numEntrances: geojson.features.length,
-      geojson
+      tileUri: "http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+      geojson : null
     });
   }
 
@@ -142,6 +180,7 @@ class Map extends Component {
   }
 
   init(id) {
+    this.getInitialState();
     if (this.state.map) return;
     // this function creates the Leaflet map object and is called after the Map component mounts
     let map = L.map(id, {
@@ -149,9 +188,9 @@ class Map extends Component {
       minZoom: 3,
       zoom: 2
     });
-
+    console.log(this.state.tileUri);
     const tileLayer = L.tileLayer(
-      config.tileLayer.uri,
+      this.state.tileUri,
       config.tileLayer.params
     ).addTo(map);
 
@@ -268,14 +307,14 @@ class Map extends Component {
 
     map.fitWorld({ animate: false });
     // set our state to include the tile layer
-    this.setState({ map, tileLayer });
+    //this.setState({ map, tileLayer });
   }
 
   render() {
     return (
       <div id="mapUI">
-        <div ref={node => (this._mapNode = node)} id="map" />
-				<div id='ms'><MapsSelection /></div>
+      <MapsSelection onChange={this.onChange.bind(this)}/>
+        <div ref={node => (this._mapNode = node)} id="map"/>
       </div>
     );
   }
