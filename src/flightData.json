@@ -1,6 +1,4 @@
-// From:  http://datasets.flowingdata.com/tuts/maparcs/flights.csv
-var flights = [
-	{
+	[{
 		"airline": "AA",
 		"airport1": "DFW",
 		"airport2": "SJU",
@@ -30042,4 +30040,4 @@ var flights = [
 		"airport2": "MSP",
 		"cnt": "4"
 	}
-];
+]

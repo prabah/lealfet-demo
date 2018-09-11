@@ -1,5 +1,4 @@
-// From:  http://airports.pidgets.com/v1/
-var airports = [
+[
     {
         "code": "ABE",
         "lat": "40.6514",
@@ -14680,4 +14679,4 @@ var airports = [
         "direct_flights": "2",
         "carriers": "1"
     }
-];
+]
