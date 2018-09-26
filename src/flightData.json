@@ -1,36 +1,38 @@
-	[{
-		"airline": "CO",
-		"airport1": "GUM",
-		"airport2": "HNL",
-		"cnt": "134"
-	},
-	{
-		"airline": "CO",
-		"airport1": "SEA",
-		"airport2": "HNL",
-		"cnt": "8"
-	},
-	{
-		"airline": "CO",
-		"airport1": "EWR",
-		"airport2": "HNL",
-		"cnt": "252"
-	},
-	{
-		"airline": "CO",
-		"airport1": "IAH",
-		"airport2": "HNL",
-		"cnt": "164"
-	},
-	{
-		"airline": "CO",
-		"airport1": "PHX",
-		"airport2": "HNL",
-		"cnt": "180"
-	},
-	{
-		"airline": "CO",
-		"airport1": "ANC",
-		"airport2": "HNL",
-		"cnt": "56"
-	}]
+[
+  {
+    "airline": "CO",
+    "airport1": "HNL",
+    "airport2": "GUM",
+    "cnt": "134"
+  },
+  {
+    "airline": "CO",
+    "airport1": "SEA",
+    "airport2": "HNL",
+    "cnt": "8"
+  },
+  {
+    "airline": "CO",
+    "airport1": "EWR",
+    "airport2": "HNL",
+    "cnt": "252"
+  },
+  {
+    "airline": "CO",
+    "airport1": "IAH",
+    "airport2": "HNL",
+    "cnt": "164"
+  },
+  {
+    "airline": "CO",
+    "airport1": "PHX",
+    "airport2": "HNL",
+    "cnt": "180"
+  },
+  {
+    "airline": "CO",
+    "airport1": "ANC",
+    "airport2": "HNL",
+    "cnt": "56"
+  }
+]
