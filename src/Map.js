@@ -15,7 +15,8 @@ config.params = {
   center: [20.0, 5.0]
 };
 config.tileLayer = {
-  uri: 'https://{s}.tile.openstreetmap.se/hydda/base/{z}/{x}/{y}.png',
+  uri:
+    'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
   params: {
     minZoom: 2,
     attribution:
@@ -182,10 +183,10 @@ class Map extends Component {
       layerOptions: {
         //					dashArray: "15, 15",
         fill: false,
-        opacity: 1.0,
-        weight: 5.5,
+        opacity: 0.6,
+        weight: 3.5,
         fillOpacity: 1.0,
-        distanceToHeight: new L.LinearFunction([0, 20], [1000, 300]),
+        distanceToHeight: new L.LinearFunction([0, 20], [2000, 300]),
 
         //The starting and ending percentages (0 - 1) along the line at which to position control points
         //controlPointOffsets: new L.Point(0.2, 0.2),
@@ -215,8 +216,8 @@ class Map extends Component {
       displayOptions: {
         cnt: {
           // weight: new L.LinearFunction([0, 1], [100, 14]),
-          color: new L.HSLHueFunction([0, 200], [200, 230], {
-            outputLuminosity: '60%'
+          color: new L.HSLHueFunction([127, 0], [127, 0], {
+            outputLuminosity: '0%'
           }),
           displayName: 'Flights'
         }
@@ -230,6 +231,31 @@ class Map extends Component {
         });
       }
     };
+
+    var myIcon = L.icon({
+      iconUrl: './Start-dot.svg'
+    });
+
+    var marker = new L.Marker(new L.LatLng(29.776071, -95.401409), {
+      radius: 10,
+      icon: myIcon
+    }).addTo(map);
+
+    marker.bindPopup('Custom Popup', {});
+
+    map.addLayer(marker);
+
+    var marker = new L.Marker(new L.LatLng(39.151187, 117.238565), {
+      radius: 10,
+      icon: myIcon
+    });
+
+    map.addLayer(marker);
+
+    L.popup({ elevation: 260.0 })
+      .setLatLng([29.776071, -95.401409])
+      .setContent('Custom Popup')
+      .addTo(map);
 
     var allLayer = new L.Graph(flights, options);
     map.addLayer(allLayer);
